@@ -63,4 +63,9 @@ dependencies {
 
     // Core with Ktx
     implementation "androidx.core:core-ktx:$version_core"
+
+    //Retrofit
+    implementation "com.squareup.retrofit2:retrofit:$version_retrofit"
+    //to eneble Retrofit to return the JSON result as a String.
+    implementation "com.squareup.retrofit2:converter-scalars:$version_retrofit"
 }

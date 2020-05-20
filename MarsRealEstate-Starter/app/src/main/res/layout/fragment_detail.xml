@@ -46,22 +46,25 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="16dp"
-                android:textColor="#de000000"
-                android:textSize="39sp"
+                android:textColor="@color/textColor"
+                android:textAppearance="@style/TextAppearance.AppCompat.Display1"
+                android:fontFamily="casual"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toBottomOf="@+id/main_photo_image"
-                tools:text="To Rent" />
+                tools:text="@string/toRent" />
 
             <TextView
                 android:id="@+id/price_value_text"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="8dp"
-                android:textColor="#de000000"
-                android:textSize="20sp"
+                android:layout_marginStart="8dp"
+                android:textColor="@color/textColor"
+                android:fontFamily="casual"
+                android:textAppearance="@style/TextAppearance.AppCompat.Title"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toBottomOf="@+id/property_type_text"
-                tools:text="$100,000" />
+                tools:text="@string/textAmount" />
 
         </androidx.constraintlayout.widget.ConstraintLayout>
     </ScrollView>
