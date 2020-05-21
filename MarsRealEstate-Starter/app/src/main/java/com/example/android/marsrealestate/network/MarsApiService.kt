@@ -17,8 +17,10 @@
 
 package com.example.android.marsrealestate.network
 
+import com.jakewharton.retrofit2.adapter.kotlin.coroutines.CoroutineCallAdapterFactory
 import com.squareup.moshi.Moshi
 import com.squareup.moshi.kotlin.reflect.KotlinJsonAdapterFactory
+import kotlinx.coroutines.Deferred
 import retrofit2.Call
 import retrofit2.Retrofit
 import retrofit2.converter.moshi.MoshiConverterFactory
@@ -43,22 +45,20 @@ private val moshi = Moshi.Builder()
 //use a Retrofit builder to create a Retrofit object
 private val retrofit = Retrofit.Builder()
         .addConverterFactory(MoshiConverterFactory.create(moshi))
+        .addCallAdapterFactory(CoroutineCallAdapterFactory())
         .baseUrl(BASE_URL)
         .build()
 
 
-// define an interface that defines how Retrofit talks to the web server using HTTP requests.
-//the goal is to get the JSON response string from the web service,
-// and i only need one method to do that: getProperties().
-// To tell Retrofit what this method should do, i use a @GET annotation and specify the path,
-// or endpoint, for that web service method. In this case the endpoint is called realestate. When the getProperties() method is invoked.
 
-//Retrofit appends the endpoint realestate to the base URL (which i defined in the Retrofit builder),
-// creates a Call object. That Call object is used to start the request.
+
+//The Deferred interface defines a coroutine job that returns a result value (Deferred inherits from Job).
+// The Deferred interface includes a method called await(), which causes your code to wait without blocking until the value is ready,
+// and then that value is returned.
 interface MarsApiService {
     @GET("realestate")
     fun getProperties():
-            Call<List<MarsProperty>>
+            Deferred<List<MarsProperty>>
 }
 
 //The Retrofit create() method creates the Retrofit service itself with the MarsApiService interface.

@@ -25,6 +25,10 @@ import com.example.android.marsrealestate.network.MarsProperty
 import com.squareup.moshi.JsonAdapter
 import com.squareup.moshi.Moshi
 import com.squareup.moshi.Types
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.launch
 import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
@@ -43,6 +47,18 @@ class OverviewViewModel : ViewModel() {
     val response: LiveData<String>
         get() = _response
 
+
+    private var viewModelJob = Job()
+
+
+    //The Dispatchers.Main dispatcher uses the UI thread for its work.
+    // Because Retrofit does all its work on a background thread,
+    // there's no reason to use any other thread for the scope.
+    // This allows you to easily update the value of the MutableLiveData when you get a result.
+    private val coroutineScope = CoroutineScope(
+            viewModelJob + Dispatchers.Main )
+
+
     /**
      * Call getMarsRealEstateProperties() on init so we can display status immediately.
      */
@@ -55,20 +71,34 @@ class OverviewViewModel : ViewModel() {
      */
     //This is the method where i'll call the Retrofit service and handle the returned JSON string.
     private fun getMarsRealEstateProperties() {
-        MarsApi.retrofitService.getProperties().enqueue(
-                object: Callback<List<MarsProperty>> {
-                    //The onFailure() callback is called when the web service response fails.
-                    //F For this response, i set the _response status to "Failure: " concatenated with the message from the Throwable argument.
-                    override fun onFailure(call: Call<List<MarsProperty>>, t: Throwable)  {
-                        _response.value = "Failure: " + t.message
-                    }
+        coroutineScope.launch {
+            var getPropertiesDeferred =
+                    MarsApi.retrofitService.getProperties()
+            try {
+                //Calling await() on the Deferred object returns the result from the network call when the value is ready.
+                //The await() method is non-blocking, so the Mars API service retrieves the data from the network
+                // without blocking the current thread—which is important
+                // because we're in the scope of the UI thread. Once the task is done,
+                // your code continues executing from where it left off
+                var listResult = getPropertiesDeferred.await()
+                _response.value =
+                        "Success: ${listResult.size} Mars properties retrieved"
+              // handle the failure response:
+            } catch (e: Exception) {
 
-                    //The onResponse() callback is called when the request is successful and the web service returns a response.
-                    override fun onResponse(call: Call<List<MarsProperty>>, response: Response<List<MarsProperty>>) {
-                        _response.value =
-                                "Success: ${response.body()?.size} Mars properties retrieved"
+            }
 
-                    }
-                })
+        }
+
     }
+    //Loading data should stop when the ViewModel is destroyed,
+    // because the OverviewFragment that uses this ViewModel will be gone.
+    // To stop loading when the ViewModel is destroyed, you override onCleared() to cancel the job.
+    override fun onCleared() {
+        super.onCleared()
+        viewModelJob.cancel()
+    }
+
+
+
 }
